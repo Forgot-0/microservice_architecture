@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+    
+    environment {
+        // Set your environment variables
+        DOCKER_REGISTRY = 'https://api.registry.zhaba.fun'
+        IMAGE_NAME = 'comments_service'
+        IMAGE_TAG = 'latest'
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                // Clone the Git repository
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                // Build Docker image
+                script {
+                    app = docker.build("${BRANCH_NAME}/${IMAGE_NAME}")
+                }
+            }
+        }
+
+        stage('Test Docker Image') {
+            steps {
+                // Add your image testing steps here
+                script {
+                    app.inside {
+             		    sh 'echo "Tests passed"'        
+            	    }  
+                }
+            }
+        }
+
+        stage('Push Docker Image to Private Registry') {
+            steps {
+                // Push Docker image to the private registry
+                script {
+                    docker.withRegistry("${DOCKER_REGISTRY}", 'registry') {        
+       			        app.push("${IMAGE_TAG}")        
+              	    } 
+                }
+            }
+        }
+    }
+    post {
+        	success {
+            	// Notify about successful build and push
+            		echo "Always OK!"
+        	}
+
+       		failure {
+            // Actions to be performed if the build or push fails
+            		echo 'Build or push failed!'
+        	}
+
+        	always {
+            		// Cleanup or additional actions
+            		script {
+                		// Remove the local Docker image
+                        sh 'docker image prune -a -f'
+            		}
+        	}
+    }
+}

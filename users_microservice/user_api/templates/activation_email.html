@@ -1,0 +1,16 @@
+
+<script>
+
+    const url = '/auth/users/activation/'
+    const response = fetch(url, {
+        method: 'POST',
+
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+
+        body: JSON.stringify({ 'uid': '{{ uid }}', 'token': '{{ token }}' })
+    })
+
+</script>

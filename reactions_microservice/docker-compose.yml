@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+      MONGO_INITDB_DATABASE: reaction
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
